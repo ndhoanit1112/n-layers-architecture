@@ -1,10 +1,12 @@
-﻿using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
+﻿using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 using NC.Infrastructure.Entities;
 
 namespace NC.Infrastructure
 {
-    public class NCContext : IdentityDbContext<ApplicationUser, ApplicationRole, string>
+    public class NCContext : IdentityDbContext<ApplicationUser, ApplicationRole, string, IdentityUserClaim<string>,
+        ApplicationUserRole, IdentityUserLogin<string>, IdentityRoleClaim<string>, IdentityUserToken<string>>
     {
         public NCContext(DbContextOptions<NCContext> options) : base(options)
         {

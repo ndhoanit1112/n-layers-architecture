@@ -12,6 +12,8 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
+using NC.Business.IServices;
+using NC.Business.Servives;
 using NC.Infrastructure;
 using NC.Infrastructure.Entities;
 
@@ -31,11 +33,25 @@ namespace NC.WebApi
         {
             services.AddDbContext<NCContext>(options => options.UseMySql(Configuration.GetConnectionString("NeoChefLocal")));
 
-            services.AddIdentityCore<ApplicationUser>(options => { });
-            new IdentityBuilder(typeof(ApplicationUser), typeof(ApplicationUserRole), services)
-                .AddRoleManager<RoleManager<IdentityRole>>()
-                .AddSignInManager<SignInManager<ApplicationUser>>()
-                .AddEntityFrameworkStores<NCContext>();
+            services.AddIdentity<ApplicationUser, ApplicationRole>()
+                    .AddEntityFrameworkStores<NCContext>()
+                    .AddDefaultTokenProviders();
+
+            services.AddTransient<IUserService, UserService>();
+
+            services.Configure<IdentityOptions>(options =>
+            {
+                // Password settings.
+                options.Password.RequireDigit = true;
+                options.Password.RequireLowercase = true;
+                options.Password.RequireNonAlphanumeric = false;
+                options.Password.RequireUppercase = true;
+                options.Password.RequiredLength = 6;
+
+                // User settings.
+                options.User.AllowedUserNameCharacters = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789-._@+";
+                options.User.RequireUniqueEmail = true;
+            });
 
             services.AddControllers();
         }
