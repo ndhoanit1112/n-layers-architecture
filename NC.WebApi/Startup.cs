@@ -17,6 +17,7 @@ using Microsoft.Extensions.Logging;
 using Microsoft.IdentityModel.Tokens;
 using NC.Business.IServices;
 using NC.Business.Servives;
+using NC.Common;
 using NC.Infrastructure;
 using NC.Infrastructure.Entities;
 
@@ -27,6 +28,7 @@ namespace NC.WebApi
         public Startup(IConfiguration configuration)
         {
             Configuration = configuration;
+            GlobalSettings.Configuration = configuration;
         }
 
         public IConfiguration Configuration { get; }
@@ -34,7 +36,7 @@ namespace NC.WebApi
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
-            services.AddDbContext<NCContext>(options => options.UseMySql(Configuration.GetConnectionString("NeoChefLocal")));
+            services.AddDbContext<NCContext>(options => options.UseMySql(Configuration.GetConnectionString("NeoChefCloud")));
 
             services.AddIdentity<ApplicationUser, ApplicationRole>()
                     .AddEntityFrameworkStores<NCContext>()
@@ -56,10 +58,14 @@ namespace NC.WebApi
                 options.User.RequireUniqueEmail = true;
             });
 
-            services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
-            .AddJwtBearer(x =>
+            services.AddAuthentication(options =>
             {
-                x.TokenValidationParameters = new TokenValidationParameters
+                options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+                options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+            })
+            .AddJwtBearer(options =>
+            {
+                options.TokenValidationParameters = new TokenValidationParameters
                 {
                     ValidateIssuerSigningKey = true,
                     IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(Configuration.GetSection("Jwt").GetValue<string>("SecretKey"))),
@@ -70,6 +76,14 @@ namespace NC.WebApi
                     ValidateLifetime = true
                 };
             });
+
+            services.AddCors(options => options.AddPolicy("CorsPolicy", builder =>
+            {
+                builder
+                    .AllowAnyMethod()
+                    .AllowAnyHeader()
+                    .AllowAnyOrigin();
+            }));
 
             services.AddControllers();
         }
@@ -85,6 +99,8 @@ namespace NC.WebApi
             app.UseHttpsRedirection();
 
             app.UseRouting();
+
+            app.UseCors("CorsPolicy");
 
             app.UseAuthentication();
             app.UseAuthorization();

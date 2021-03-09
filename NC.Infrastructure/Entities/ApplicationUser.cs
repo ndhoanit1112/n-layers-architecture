@@ -1,7 +1,7 @@
 ﻿using Microsoft.AspNetCore.Identity;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.ComponentModel.DataAnnotations;
-using System.ComponentModel.DataAnnotations.Schema;
 
 namespace NC.Infrastructure.Entities
 {
@@ -14,6 +14,9 @@ namespace NC.Infrastructure.Entities
         [Required]
         [StringLength(256)]
         public string LastName { get; set; }
+
+        [DefaultValue(false)]
+        public bool IsDeleted { get; set; }
 
         public virtual ICollection<ApplicationUserRole> UserRoles { get; set; }
     }

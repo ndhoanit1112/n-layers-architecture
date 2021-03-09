@@ -9,7 +9,7 @@ using NC.Infrastructure;
 namespace NC.Infrastructure.Migrations
 {
     [DbContext(typeof(NCContext))]
-    [Migration("20210308061523_InitIdentityTables")]
+    [Migration("20210309070307_InitIdentityTables")]
     partial class InitIdentityTables
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -155,6 +155,9 @@ namespace NC.Infrastructure.Migrations
                         .IsRequired()
                         .HasColumnType("varchar(256) CHARACTER SET utf8mb4")
                         .HasMaxLength(256);
+
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("tinyint(1)");
 
                     b.Property<string>("LastName")
                         .IsRequired()

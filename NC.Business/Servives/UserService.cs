@@ -1,10 +1,17 @@
 ﻿using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.Configuration;
+using Microsoft.IdentityModel.Tokens;
 using NC.Business.IServices;
+using NC.BusinessModel.User;
+using NC.Common;
+using NC.Common.Enums;
 using NC.Infrastructure;
 using NC.Infrastructure.Entities;
 using System;
 using System.Collections.Generic;
+using System.IdentityModel.Tokens.Jwt;
+using System.Linq;
+using System.Security.Claims;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -16,13 +23,16 @@ namespace NC.Business.Servives
 
         private readonly UserManager<ApplicationUser> _userManager;
 
-        private readonly IConfiguration _config;
+        private readonly SignInManager<ApplicationUser> _signInManager;
 
-        public UserService(NCContext context, UserManager<ApplicationUser> userManager, IConfiguration config)
+        private readonly RoleManager<ApplicationRole> _roleManager;
+
+        public UserService(NCContext context, UserManager<ApplicationUser> userManager, SignInManager<ApplicationUser> signInManager, RoleManager<ApplicationRole> roleManager)
         {
             _context = context;
             _userManager = userManager;
-            _config = config;
+            _signInManager = signInManager;
+            _roleManager = roleManager;
         }
 
         public async Task<bool> CreateUser(string username, string email, string password)
@@ -36,28 +46,69 @@ namespace NC.Business.Servives
             };
 
             var result = await _userManager.CreateAsync(newUser, password);
+
+            await _userManager.AddToRoleAsync(newUser, Constants.SystemAdminRole);
             return result.Succeeded;
         }
 
-        //private string GenerateJSONWebToken(UserModel userInfo)
-        //{
-        //    var securityKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_config["Jwt:Key"]));
-        //    var credentials = new SigningCredentials(securityKey, SecurityAlgorithms.HmacSha256);
+        public async Task<LoginResult> Authenticate(LoginModel loginModel)
+        {
+            var user = await _userManager.FindByNameAsync(loginModel.Username);
 
-        //    var claims = new[] {
-        //        new Claim(JwtRegisteredClaimNames.Sub, userInfo.Username),
-        //        new Claim(JwtRegisteredClaimNames.Email, userInfo.EmailAddress),
-        //        new Claim("DateOfJoing", userInfo.DateOfJoing.ToString("yyyy-MM-dd")),
-        //        new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString())
-        //    };
+            if(user == null)
+            {
+                return new LoginResult(LoginStatus.Failed, "Invalid username or password!");
+            }
 
-        //    var token = new JwtSecurityToken(_config["Jwt:Issuer"],
-        //        _config["Jwt:Issuer"],
-        //        claims,
-        //        expires: DateTime.Now.AddMinutes(120),
-        //        signingCredentials: credentials);
+            var signInResult = await _signInManager.PasswordSignInAsync(loginModel.Username, loginModel.Password, false, false);
 
-        //    return new JwtSecurityTokenHandler().WriteToken(token);
-        //}
+            //...other login results(locked,...)
+
+            if (signInResult.Succeeded)
+            {
+                var userInfo = new UserInfo
+                {
+                    Id = user.Id,
+                    Username = user.UserName,
+                    Email = user.Email,
+                    FirstName = user.FirstName,
+                    LastName = user.LastName,
+                    Roles = (await _userManager.GetRolesAsync(user)).ToArray(),
+                };
+
+                var loginResult = new LoginResult(LoginStatus.Success);
+                loginResult.AccessToken = GenerateJSONWebToken(userInfo);
+
+                return loginResult;
+            }
+
+            return new LoginResult(LoginStatus.Failed, "Invalid username or password!");
+        }
+
+        private string GenerateJSONWebToken(UserInfo userInfo)
+        {
+            var securityKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(GlobalSettings.GetSecret()));
+            var credentials = new SigningCredentials(securityKey, SecurityAlgorithms.HmacSha256);
+
+            var claims = new List<Claim>() {
+                new Claim(ClaimTypes.NameIdentifier, userInfo.Id),
+                new Claim(ClaimTypes.GivenName, userInfo.FirstName),
+                new Claim(ClaimTypes.Surname, userInfo.LastName),
+                new Claim(ClaimTypes.Email, userInfo.Email),
+            };
+
+            foreach(var role in userInfo.Roles)
+            {
+                claims.Add(new Claim(ClaimTypes.Role, role));
+            }
+
+            var token = new JwtSecurityToken(GlobalSettings.GetIssuer(),
+                GlobalSettings.GetAudience(),
+                claims,
+                expires: DateTime.Now.AddDays(1),
+                signingCredentials: credentials);
+
+            return new JwtSecurityTokenHandler().WriteToken(token);
+        }
     }
 }

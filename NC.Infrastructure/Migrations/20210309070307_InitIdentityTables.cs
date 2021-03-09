@@ -42,7 +42,8 @@ namespace NC.Infrastructure.Migrations
                     LockoutEnabled = table.Column<bool>(nullable: false),
                     AccessFailedCount = table.Column<int>(nullable: false),
                     FirstName = table.Column<string>(maxLength: 256, nullable: false),
-                    LastName = table.Column<string>(maxLength: 256, nullable: false)
+                    LastName = table.Column<string>(maxLength: 256, nullable: false),
+                    IsDeleted = table.Column<bool>(nullable: false)
                 },
                 constraints: table =>
                 {
