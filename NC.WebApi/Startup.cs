@@ -18,6 +18,7 @@ using Microsoft.IdentityModel.Tokens;
 using NC.Business.IServices;
 using NC.Business.Servives;
 using NC.Common;
+using NC.Common.Helpers;
 using NC.Infrastructure;
 using NC.Infrastructure.Entities;
 
@@ -36,13 +37,21 @@ namespace NC.WebApi
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
-            services.AddDbContext<NCContext>(options => options.UseMySql(Configuration.GetConnectionString("NeoChefCloud")));
+            services.AddDbContext<NCContext>(options => options.UseMySql(Configuration.GetConnectionString("NeoChefCloud"), sqlOptions =>
+            {
+                sqlOptions.EnableRetryOnFailure
+                (
+                    maxRetryCount: 2
+                );
+            }));
 
             services.AddIdentity<ApplicationUser, ApplicationRole>()
                     .AddEntityFrameworkStores<NCContext>()
                     .AddDefaultTokenProviders();
 
-            services.AddTransient<IUserService, UserService>();
+            services.RegisterAssemblyTypes(typeof(UserService).Assembly)
+                .Where(c => c.Name.EndsWith("Service", StringComparison.Ordinal))
+                .AsImplementedInterfaces();
 
             services.Configure<IdentityOptions>(options =>
             {
@@ -85,7 +94,8 @@ namespace NC.WebApi
                     .AllowAnyOrigin();
             }));
 
-            services.AddControllers();
+            services.AddControllers()
+                    .AddNewtonsoftJson();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.

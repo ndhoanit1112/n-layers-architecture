@@ -1,2 +1,10 @@
 runtime: aspnetcore 
 env: flex
+manual_scaling:
+  instances: 1
+resources:
+  cpu: 1
+  memory_gb: 1
+  disk_size_gb: 10
+beta_settings:
+  cloud_sql_instances: project-ns-307009:asia-northeast1:neo-chef=tcp:3306

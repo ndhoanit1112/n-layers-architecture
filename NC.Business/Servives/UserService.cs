@@ -76,8 +76,10 @@ namespace NC.Business.Servives
                     Roles = (await _userManager.GetRolesAsync(user)).ToArray(),
                 };
 
-                var loginResult = new LoginResult(LoginStatus.Success);
-                loginResult.AccessToken = GenerateJSONWebToken(userInfo);
+                var loginResult = new LoginResult(LoginStatus.Success)
+                {
+                    AccessToken = GenerateJSONWebToken(userInfo)
+                };
 
                 return loginResult;
             }

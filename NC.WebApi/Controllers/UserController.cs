@@ -26,7 +26,7 @@ namespace NC.WebApi.Controllers
         [HttpGet]
         public IEnumerable<string> Get()
         {
-            return new string[] { "value1", "value2" };
+            return new string[] { "value123456", "value2" };
         }
 
         // GET api/<UserController>/5
@@ -57,14 +57,23 @@ namespace NC.WebApi.Controllers
 
         // PUT api/<UserController>/5
         [HttpPut("{id}")]
-        public void Put(int id, [FromBody] string value)
+        public IActionResult Put(int id, [FromBody] string value)
         {
+            return Ok(new { id, value });
         }
 
         // DELETE api/<UserController>/5
         [HttpDelete("{id}")]
-        public void Delete(int id)
+        public IActionResult Delete(int id)
         {
+            return Ok(id);
+        }
+
+        [HttpPost("{id}")]
+        [Route("test")]
+        public IActionResult Test(int id, [FromForm] LoginModel model)
+        {
+            return Ok(model);
         }
     }
 }
