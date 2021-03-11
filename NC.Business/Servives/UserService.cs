@@ -2,7 +2,7 @@
 using Microsoft.Extensions.Configuration;
 using Microsoft.IdentityModel.Tokens;
 using NC.Business.IServices;
-using NC.BusinessModel.User;
+using NC.Business.Models.User;
 using NC.Common;
 using NC.Common.Enums;
 using NC.Infrastructure;

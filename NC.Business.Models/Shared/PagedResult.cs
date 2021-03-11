@@ -1,6 +1,6 @@
 ﻿using NC.Common;
 
-namespace NC.BusinessModel.Shared
+namespace NC.Business.Models.Shared
 {
     public class PagedResult<TEntity> where TEntity : class
     {

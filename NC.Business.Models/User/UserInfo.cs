@@ -1,4 +1,4 @@
-﻿namespace NC.BusinessModel.User
+﻿namespace NC.Business.Models.User
 {
     public class UserInfo
     {

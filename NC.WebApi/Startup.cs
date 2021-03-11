@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using AutoMapper;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
@@ -15,7 +16,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using Microsoft.IdentityModel.Tokens;
-using NC.Business.IServices;
+using NC.Business;
 using NC.Business.Servives;
 using NC.Common;
 using NC.Common.Helpers;
@@ -85,6 +86,12 @@ namespace NC.WebApi
                     ValidateLifetime = true
                 };
             });
+
+            services.AddSingleton(new MapperConfiguration(mc =>
+            {
+                mc.AddProfile(new MappingDtoDomainProfile());
+                mc.AddProfile(new MappingDomainEntityProfile());
+            }).CreateMapper());
 
             services.AddCors(options => options.AddPolicy("CorsPolicy", builder =>
             {

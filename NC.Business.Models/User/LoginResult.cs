@@ -1,6 +1,6 @@
 ﻿using NC.Common.Enums;
 
-namespace NC.BusinessModel.User
+namespace NC.Business.Models.User
 {
     public class LoginResult
     {

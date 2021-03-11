@@ -19,6 +19,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\NC.Business\NC.Business.csproj" />
+    <ProjectReference Include="..\NC.WebApi.DTOs\NC.WebApi.DTOs.csproj" />
   </ItemGroup>
 
 

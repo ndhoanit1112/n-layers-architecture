@@ -2,22 +2,24 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using AutoMapper;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using NC.Business.IServices;
-using NC.BusinessModel.User;
-
-// For more information on enabling Web API for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
+using NC.Business.Models.User;
+using NC.WebApi.Controllers.Base;
+using NC.WebApi.DTOs.Models;
+using NC.WebApi.DTOs.Results;
 
 namespace NC.WebApi.Controllers
 {
     [Route("api/[controller]")]
-    [ApiController]
-    public class UserController : ControllerBase
+    public class UserController : ApiBaseController
     {
         private readonly IUserService _userService;
 
-        public UserController(IUserService userService)
+        public UserController(IUserService userService, IMapper mapper)
+            : base(mapper)
         {
             _userService = userService;
         }
@@ -48,11 +50,11 @@ namespace NC.WebApi.Controllers
 
         [HttpPost]
         [Route("login")]
-        public async Task<IActionResult> Login([FromForm] LoginModel model)
+        public async Task<IActionResult> Login([FromForm] LoginModelDTO model)
         {
-            var result = await _userService.Authenticate(model);
+            var result = await _userService.Authenticate(_mapper.Map<LoginModel>(model));
 
-            return Ok(result);
+            return Ok(_mapper.Map<LoginResultDTO>(result));
         }
 
         // PUT api/<UserController>/5
@@ -67,13 +69,6 @@ namespace NC.WebApi.Controllers
         public IActionResult Delete(int id)
         {
             return Ok(id);
-        }
-
-        [HttpPost("{id}")]
-        [Route("test")]
-        public IActionResult Test(int id, [FromForm] LoginModel model)
-        {
-            return Ok(model);
         }
     }
 }
