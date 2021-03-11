@@ -20,5 +20,15 @@ namespace NC.Common
         {
             return Configuration.GetSection("Jwt").GetValue<string>("SecretKey");
         }
+
+        public static string GetGoogleCredentialFile()
+        {
+            return Configuration.GetSection("GoogleCloudStorage").GetValue<string>("CredentialFile");
+        }
+
+        public static string GetGoogleCloudStorageBucket()
+        {
+            return Configuration.GetSection("GoogleCloudStorage").GetValue<string>("Bucket");
+        }
     }
 }

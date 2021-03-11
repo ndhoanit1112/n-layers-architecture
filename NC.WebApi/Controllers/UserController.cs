@@ -4,6 +4,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using AutoMapper;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using NC.Business.IServices;
 using NC.Business.Models.User;
@@ -18,10 +19,13 @@ namespace NC.WebApi.Controllers
     {
         private readonly IUserService _userService;
 
-        public UserController(IUserService userService, IMapper mapper)
+        private readonly ICloudStorageService _storageService;
+
+        public UserController(IUserService userService, ICloudStorageService storageService, IMapper mapper)
             : base(mapper)
         {
             _userService = userService;
+            _storageService = storageService;
         }
 
         // GET: api/<UserController>
@@ -69,6 +73,15 @@ namespace NC.WebApi.Controllers
         public IActionResult Delete(int id)
         {
             return Ok(id);
+        }
+
+        [HttpPost]
+        [Route("uploadfile")]
+        public async Task<IActionResult> UploadFile(IFormFile file)
+        {
+            var result = await _storageService.UploadFileAsync(file, file.FileName);
+
+            return Ok(result);
         }
     }
 }
