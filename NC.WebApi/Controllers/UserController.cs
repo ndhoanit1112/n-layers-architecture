@@ -26,7 +26,7 @@ namespace NC.WebApi.Controllers
         [HttpGet]
         public IEnumerable<string> Get()
         {
-            return new string[] { "value123456", "value2" };
+            return new string[] { "value1234567", "value2" };
         }
 
         // GET api/<UserController>/5

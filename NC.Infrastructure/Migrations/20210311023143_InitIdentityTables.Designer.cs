@@ -9,7 +9,7 @@ using NC.Infrastructure;
 namespace NC.Infrastructure.Migrations
 {
     [DbContext(typeof(NCContext))]
-    [Migration("20210309070307_InitIdentityTables")]
+    [Migration("20210311023143_InitIdentityTables")]
     partial class InitIdentityTables
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
