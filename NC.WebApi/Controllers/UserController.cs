@@ -32,7 +32,7 @@ namespace NC.WebApi.Controllers
         [HttpGet]
         public IEnumerable<string> Get()
         {
-            return new string[] { "value1234567", "value2" };
+            return new string[] { "value12345678", "value2" };
         }
 
         // GET api/<UserController>/5
@@ -77,11 +77,22 @@ namespace NC.WebApi.Controllers
 
         [HttpPost]
         [Route("uploadfile")]
+        [Authorize]
         public async Task<IActionResult> UploadFile(IFormFile file)
         {
             var result = await _storageService.UploadFileAsync(file, file.FileName);
 
             return Ok(result);
+        }
+
+        [HttpPost]
+        [Route("deletefile")]
+        [Authorize]
+        public async Task<IActionResult> DeleteFile([FromForm] string fileName)
+        {
+            await _storageService.DeleteFileAsync(fileName);
+
+            return Ok(true);
         }
     }
 }

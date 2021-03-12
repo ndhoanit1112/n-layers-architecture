@@ -18,7 +18,7 @@ namespace NC.Business.Servives
 
         public CloudStorageService()
         {
-            _googleCredential = GoogleCredential.FromFile(GlobalSettings.GetGoogleCredentialFile());
+            _googleCredential = GoogleCredential.GetApplicationDefault();
             _storageClient = StorageClient.Create(_googleCredential);
             _bucketName = GlobalSettings.GetGoogleCloudStorageBucket();
         }

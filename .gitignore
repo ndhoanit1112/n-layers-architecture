@@ -311,3 +311,4 @@ __pycache__/
 #Log
 Properties/Logs/*
 !OPS/log4net.config
+/NC.WebApi/project-ns-307009-6fca345db092.json

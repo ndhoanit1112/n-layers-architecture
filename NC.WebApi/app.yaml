@@ -6,5 +6,9 @@ resources:
   cpu: 1
   memory_gb: 1
   disk_size_gb: 10
+liveness_check:
+  check_interval_sec: 60
+readiness_check:
+  check_interval_sec: 30
 beta_settings:
-  cloud_sql_instances: project-ns-307009:asia-southeast1:neochef=tcp:3306
+  cloud_sql_instances: project-ns-307009:asia-northeast1:neo-chef-db=tcp:3306
