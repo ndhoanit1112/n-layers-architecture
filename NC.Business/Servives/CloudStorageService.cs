@@ -2,13 +2,15 @@
 using Google.Cloud.Storage.V1;
 using Microsoft.AspNetCore.Http;
 using NC.Business.IServices;
+using NC.Business.Servives.Base;
 using NC.Common;
+using System;
 using System.IO;
 using System.Threading.Tasks;
 
 namespace NC.Business.Servives
 {
-    public class CloudStorageService : ICloudStorageService
+    public class CloudStorageService : BaseService, ICloudStorageService
     {
         private readonly GoogleCredential _googleCredential;
 
@@ -35,6 +37,12 @@ namespace NC.Business.Servives
         public async Task DeleteFileAsync(string fileNameForStorage)
         {
             await _storageClient.DeleteObjectAsync(_bucketName, fileNameForStorage);
+        }
+
+        public override void Dispose()
+        {
+            _storageClient.Dispose();
+            base.Dispose();
         }
     }
 }
