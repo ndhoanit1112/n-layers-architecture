@@ -1,7 +1,7 @@
 ﻿using AutoMapper;
 using NC.Business.Models.User;
-using NC.WebApi.DTOs.Models;
-using NC.WebApi.DTOs.Results;
+using NC.WebApi.DTOs.Models.User;
+using NC.WebApi.DTOs.Results.User;
 
 namespace NC.WebApi
 {

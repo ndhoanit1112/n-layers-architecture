@@ -22,6 +22,7 @@ using NC.Common;
 using NC.Common.Helpers;
 using NC.Infrastructure;
 using NC.Infrastructure.Entities;
+using NC.WebApi.Middlewares;
 
 namespace NC.WebApi
 {
@@ -121,6 +122,8 @@ namespace NC.WebApi
 
             app.UseAuthentication();
             app.UseAuthorization();
+
+            app.UseErrorHandlerMiddleware();
 
             app.UseEndpoints(endpoints =>
             {

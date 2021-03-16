@@ -4,7 +4,6 @@ using Microsoft.AspNetCore.Http;
 using NC.Business.IServices;
 using NC.Business.Servives.Base;
 using NC.Common;
-using System;
 using System.IO;
 using System.Threading.Tasks;
 
