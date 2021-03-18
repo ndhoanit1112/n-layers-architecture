@@ -12,5 +12,6 @@ namespace NC.Business.IServices
         Task<bool> CreateUser(string username, string email, string password);
 
         Task<LoginResult> Authenticate(LoginModel loginModel);
+        bool CheckUsernameExisted(string username);
     }
 }

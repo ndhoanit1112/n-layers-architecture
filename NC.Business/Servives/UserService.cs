@@ -113,5 +113,10 @@ namespace NC.Business.Servives
 
             return new JwtSecurityTokenHandler().WriteToken(token);
         }
+
+        public bool CheckUsernameExisted(string username)
+        {
+            return _context.Users.Any(u => u.UserName == username);
+        }
     }
 }

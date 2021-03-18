@@ -49,6 +49,16 @@ namespace NC.WebApi.Controllers
             return "value";
         }
 
+        // GET api/<UserController>/5
+        [HttpGet]
+        [Route("checkusername")]
+        public IActionResult CheckUserName(string username)
+        {
+            var result = _userService.CheckUsernameExisted(username);
+
+            return Ok(result);
+        }
+
         // POST api/<UserController>
         [HttpPost]
         public async Task<IActionResult> Post([FromForm] string username)

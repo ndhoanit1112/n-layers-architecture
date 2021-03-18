@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Text.Json;
 using System.Threading.Tasks;
 using AutoMapper;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
@@ -17,7 +18,9 @@ using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using Microsoft.IdentityModel.Tokens;
 using NC.Business;
+using NC.Business.IServices.Base;
 using NC.Business.Servives;
+using NC.Business.Servives.Base;
 using NC.Common;
 using NC.Common.Helpers;
 using NC.Infrastructure;
@@ -52,8 +55,9 @@ namespace NC.WebApi
                     .AddDefaultTokenProviders();
 
             services.RegisterAssemblyTypes(typeof(UserService).Assembly)
-                .Where(c => c.Name.EndsWith("Service", StringComparison.Ordinal))
-                .AsImplementedInterfaces();
+                .Where(c => c.Name.EndsWith("Service", StringComparison.Ordinal)
+                            && c != typeof(BaseService))
+                .AsImplementedInterfaces(typeof(IBaseService));
 
             services.Configure<IdentityOptions>(options =>
             {
@@ -103,7 +107,10 @@ namespace NC.WebApi
             }));
 
             services.AddControllers()
-                    .AddNewtonsoftJson();
+                    .AddJsonOptions(x =>
+                    {
+                        x.JsonSerializerOptions.PropertyNamingPolicy = JsonNamingPolicy.CamelCase;
+                    });
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
