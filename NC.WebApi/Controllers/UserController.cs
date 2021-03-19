@@ -4,12 +4,14 @@ using System.Linq;
 using System.Threading.Tasks;
 using AutoMapper;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using NC.Business.IServices;
 using NC.Business.Models.User;
+using NC.Common.CustomExceptions;
 using NC.WebApi.Controllers.Base;
-using NC.WebApi.DTOs.Models;
-using NC.WebApi.DTOs.Results;
+using NC.WebApi.DTOs.Models.User;
+using NC.WebApi.DTOs.Results.User;
 
 namespace NC.WebApi.Controllers
 {
@@ -18,25 +20,43 @@ namespace NC.WebApi.Controllers
     {
         private readonly IUserService _userService;
 
-        public UserController(IUserService userService, IMapper mapper)
+        private readonly ICloudStorageService _storageService;
+
+        public UserController(IUserService userService, ICloudStorageService storageService, IMapper mapper)
             : base(mapper)
         {
             _userService = userService;
+            _storageService = storageService;
         }
 
         // GET: api/<UserController>
         [HttpGet]
         public IEnumerable<string> Get()
         {
-            return new string[] { "value1234567", "value2" };
+            return new string[] { "value12345678", "value2" };
         }
 
         // GET api/<UserController>/5
         [HttpGet("{id}")]
-        [Authorize]
+        //[Authorize]
         public string Get(int id)
         {
+            if (id < 2)
+            {
+                throw new BusinessException("Two more than one!");
+            }
+
             return "value";
+        }
+
+        // GET api/<UserController>/5
+        [HttpGet]
+        [Route("checkusername")]
+        public IActionResult CheckUserName(string username)
+        {
+            var result = _userService.CheckUsernameExisted(username);
+
+            return Ok(result);
         }
 
         // POST api/<UserController>
@@ -69,6 +89,26 @@ namespace NC.WebApi.Controllers
         public IActionResult Delete(int id)
         {
             return Ok(id);
+        }
+
+        [HttpPost]
+        [Route("uploadfile")]
+        [Authorize]
+        public async Task<IActionResult> UploadFile(IFormFile file)
+        {
+            var result = await _storageService.UploadFileAsync(file, file.FileName);
+
+            return Ok(result);
+        }
+
+        [HttpPost]
+        [Route("deletefile")]
+        [Authorize]
+        public async Task<IActionResult> DeleteFile([FromForm] string fileName)
+        {
+            await _storageService.DeleteFileAsync(fileName);
+
+            return Ok(true);
         }
     }
 }

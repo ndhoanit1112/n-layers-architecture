@@ -1,4 +1,4 @@
-﻿namespace NC.WebApi.DTOs.Results
+﻿namespace NC.WebApi.DTOs.Results.User
 {
     public class LoginResultDTO
     {

@@ -28,6 +28,7 @@ namespace NC.Common.Helpers
 
         public static IServiceCollection AsImplementedInterfaces(
             this AutoRegisterData autoRegData,
+            Type baseInterface,
             ServiceLifetime lifetime = ServiceLifetime.Transient)
         {
             if (autoRegData == null)
@@ -40,7 +41,7 @@ namespace NC.Common.Helpers
                 : autoRegData.TypesToConsider.Where(autoRegData.TypeFilter))
             {
                 var interfaces = classType.GetTypeInfo().ImplementedInterfaces
-                    .Where(i => i != typeof(IDisposable) && i.IsPublic);
+                    .Where(i => i != typeof(IDisposable) && i != baseInterface && i.IsPublic);
                 foreach (var infc in interfaces)
                 {
                     autoRegData.Services.Add(new ServiceDescriptor(infc, classType, lifetime));

@@ -3,6 +3,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.IdentityModel.Tokens;
 using NC.Business.IServices;
 using NC.Business.Models.User;
+using NC.Business.Servives.Base;
 using NC.Common;
 using NC.Common.Enums;
 using NC.Infrastructure;
@@ -17,7 +18,7 @@ using System.Threading.Tasks;
 
 namespace NC.Business.Servives
 {
-    public class UserService : IUserService
+    public class UserService : BaseService, IUserService
     {
         private readonly NCContext _context;
 
@@ -111,6 +112,11 @@ namespace NC.Business.Servives
                 signingCredentials: credentials);
 
             return new JwtSecurityTokenHandler().WriteToken(token);
+        }
+
+        public bool CheckUsernameExisted(string username)
+        {
+            return _context.Users.Any(u => u.UserName == username);
         }
     }
 }
