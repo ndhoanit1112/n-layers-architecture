@@ -14,8 +14,7 @@ namespace NC.WebApi
             CreateMap<RefreshTokenModelDTO, RefreshTokenModel>();
 
             //Mapping Domain Model to DTO (result)
-            CreateMap<LoginResult, LoginResultDTO>()
-                .ForMember(d => d.Status, opts => opts.MapFrom(s => (int)s.Status));
+            CreateMap<LoginResult, LoginResultDTO>();
         }
     }
 }

@@ -9,7 +9,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.Net.Http.Headers;
 using NC.Business.IServices;
 using NC.Business.Models.User;
-using NC.Common.CustomExceptions;
+using NC.Common.Enums;
 using NC.WebApi.Controllers.Base;
 using NC.WebApi.DTOs.Models.User;
 using NC.WebApi.DTOs.Results.User;
@@ -30,26 +30,6 @@ namespace NC.WebApi.Controllers
             _storageService = storageService;
         }
 
-        // GET: api/<UserController>
-        [HttpGet]
-        public IEnumerable<string> Get()
-        {
-            return new string[] { "value12345678", "value2" };
-        }
-
-        // GET api/<UserController>/5
-        [HttpGet("{id}")]
-        //[Authorize]
-        public string Get(int id)
-        {
-            if (id < 2)
-            {
-                throw new BusinessException("Two more than one!");
-            }
-
-            return "value";
-        }
-
         // GET api/<UserController>/5
         [HttpGet]
         [Route("checkusername")]
@@ -57,7 +37,7 @@ namespace NC.WebApi.Controllers
         {
             var result = _userService.CheckUsernameExisted(username);
 
-            return Ok(result);
+            return Ok(Success(result));
         }
 
         // POST api/<UserController>
@@ -66,7 +46,7 @@ namespace NC.WebApi.Controllers
         {
             var result = await _userService.CreateUser(username, $"{username}@gmail.com", "Hello123#");
 
-            return Ok(result);
+            return Ok(Success(result));
         }
 
         [HttpPost]
@@ -78,7 +58,17 @@ namespace NC.WebApi.Controllers
 
             var result = await _userService.Authenticate(loginModel);
 
-            return Ok(_mapper.Map<LoginResultDTO>(result));
+            if (result.Status == LoginStatus.Failed)
+            {
+                return Unauthorized(Failed((int)ResponseCode.Failed, result.Message));
+            }
+
+            if (result.Status == LoginStatus.UserLocked || result.Status == LoginStatus.UserExpired)
+            {
+                return Forbid(Failed((int)ResponseCode.Failed, result.Message));
+            }
+
+            return Ok(Success(_mapper.Map<LoginResultDTO>(result)));
         }
 
         [HttpPost]
@@ -90,21 +80,12 @@ namespace NC.WebApi.Controllers
 
             var result = await _userService.RefreshToken(refreshTokenModel);
 
-            return Ok(new RefreshTokenResultDTO(result));
-        }
+            if (result == null)
+            {
+                return Unauthorized(Failed());
+            }
 
-        // PUT api/<UserController>/5
-        [HttpPut("{id}")]
-        public IActionResult Put(int id, [FromBody] string value)
-        {
-            return Ok(new { id, value });
-        }
-
-        // DELETE api/<UserController>/5
-        [HttpDelete("{id}")]
-        public IActionResult Delete(int id)
-        {
-            return Ok(id);
+            return Ok(Success(new RefreshTokenResultDTO(result)));
         }
 
         [HttpPost]
@@ -114,7 +95,7 @@ namespace NC.WebApi.Controllers
         {
             var result = await _storageService.UploadFileAsync(file, file.FileName);
 
-            return Ok(result);
+            return Ok(Success(result));
         }
 
         [HttpPost]
@@ -124,7 +105,7 @@ namespace NC.WebApi.Controllers
         {
             await _storageService.DeleteFileAsync(fileName);
 
-            return Ok(true);
+            return Ok(Success(true));
         }
     }
 }

@@ -2,6 +2,7 @@
 using Microsoft.AspNetCore.Http;
 using NC.Common;
 using NC.Common.CustomExceptions;
+using NC.Common.Enums;
 using NC.WebApi.DTOs.Results;
 using Newtonsoft.Json;
 using System;
@@ -40,7 +41,7 @@ namespace NC.WebApi.Middlewares
                 _ => (int)HttpStatusCode.InternalServerError,
             };
 
-            var result = JsonConvert.SerializeObject(new ApiResponse(statusCode, exception.Message));
+            var result = JsonConvert.SerializeObject(new ApiResponse((int)ResponseCode.Failed, exception.Message));
 
             context.Response.ContentType = Constants.JsonContentType;
             context.Response.StatusCode = statusCode;
