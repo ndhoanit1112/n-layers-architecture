@@ -10,6 +10,8 @@ namespace NC.Business.Models.User
 
         public string AccessToken { get; set; }
 
+        public string RefreshToken { get; set; }
+
         public LoginResult(LoginStatus status)
         {
             Status = status;

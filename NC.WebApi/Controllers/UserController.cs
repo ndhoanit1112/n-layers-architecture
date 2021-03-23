@@ -6,6 +6,7 @@ using AutoMapper;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Net.Http.Headers;
 using NC.Business.IServices;
 using NC.Business.Models.User;
 using NC.Common.CustomExceptions;
@@ -72,9 +73,24 @@ namespace NC.WebApi.Controllers
         [Route("login")]
         public async Task<IActionResult> Login([FromForm] LoginModelDTO model)
         {
-            var result = await _userService.Authenticate(_mapper.Map<LoginModel>(model));
+            var loginModel = _mapper.Map<LoginModel>(model);
+            loginModel.UserAgent = Request.Headers[HeaderNames.UserAgent].ToString();
+
+            var result = await _userService.Authenticate(loginModel);
 
             return Ok(_mapper.Map<LoginResultDTO>(result));
+        }
+
+        [HttpPost]
+        [Route("refreshtoken")]
+        public async Task<IActionResult> RefreshToken([FromForm] RefreshTokenModelDTO model)
+        {
+            var refreshTokenModel = _mapper.Map<RefreshTokenModel>(model);
+            refreshTokenModel.UserAgent = Request.Headers[HeaderNames.UserAgent].ToString();
+
+            var result = await _userService.RefreshToken(refreshTokenModel);
+
+            return Ok(new RefreshTokenResultDTO(result));
         }
 
         // PUT api/<UserController>/5

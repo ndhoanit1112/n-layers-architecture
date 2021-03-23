@@ -11,6 +11,7 @@ namespace NC.WebApi
         {
             //Mapping DTO (model) to Domain Model
             CreateMap<LoginModelDTO, LoginModel>();
+            CreateMap<RefreshTokenModelDTO, RefreshTokenModel>();
 
             //Mapping Domain Model to DTO (result)
             CreateMap<LoginResult, LoginResultDTO>()

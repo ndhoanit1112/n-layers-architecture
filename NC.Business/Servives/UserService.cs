@@ -6,6 +6,7 @@ using NC.Business.Models.User;
 using NC.Business.Servives.Base;
 using NC.Common;
 using NC.Common.Enums;
+using NC.Common.Helpers;
 using NC.Infrastructure;
 using NC.Infrastructure.Entities;
 using System;
@@ -13,6 +14,7 @@ using System.Collections.Generic;
 using System.IdentityModel.Tokens.Jwt;
 using System.Linq;
 using System.Security.Claims;
+using System.Security.Cryptography;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -77,9 +79,25 @@ namespace NC.Business.Servives
                     Roles = (await _userManager.GetRolesAsync(user)).ToArray(),
                 };
 
+                var refreshToken = GenerateRefreshToken();
+                var now = DateTime.Now;
+
+                var newRefreshTokenDb = new RefreshToken
+                {
+                    TokenHashed = HashHelper.HashStringMD5(refreshToken),
+                    Expires = now.AddDays(7),
+                    UserAgent = loginModel.UserAgent,
+                    InsertDate = now,
+                    InsertUserId = user.Id,
+                };
+
+                _context.RefreshTokens.Add(newRefreshTokenDb);
+                _context.SaveChanges();
+
                 var loginResult = new LoginResult(LoginStatus.Success)
                 {
-                    AccessToken = GenerateJSONWebToken(userInfo)
+                    AccessToken = GenerateAccessToken(userInfo),
+                    RefreshToken = refreshToken,
                 };
 
                 return loginResult;
@@ -88,7 +106,39 @@ namespace NC.Business.Servives
             return new LoginResult(LoginStatus.Failed, "Invalid username or password!");
         }
 
-        private string GenerateJSONWebToken(UserInfo userInfo)
+        public async Task<string> RefreshToken(RefreshTokenModel model)
+        {
+            var hashedToken = HashHelper.HashStringMD5(model.RefreshToken);
+            var refreshToken = _context.RefreshTokens.SingleOrDefault(t => t.InsertUserId == model.UserId && t.TokenHashed == hashedToken && t.UserAgent == model.UserAgent);
+            if (refreshToken == null)
+                return null;
+
+            if (DateTime.Now > refreshToken.Expires)
+            {
+                _context.RefreshTokens.Remove(refreshToken);
+                _context.SaveChanges();
+
+                return null;
+            }
+
+            var user = await _userManager.FindByIdAsync(model.UserId);
+            if (user == null)
+                return null;
+
+            var userInfo = new UserInfo
+            {
+                Id = user.Id,
+                Username = user.UserName,
+                Email = user.Email,
+                FirstName = user.FirstName,
+                LastName = user.LastName,
+                Roles = (await _userManager.GetRolesAsync(user)).ToArray(),
+            };
+
+            return GenerateAccessToken(userInfo);
+        }
+
+        private string GenerateAccessToken(UserInfo userInfo)
         {
             var securityKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(GlobalSettings.GetSecret()));
             var credentials = new SigningCredentials(securityKey, SecurityAlgorithms.HmacSha256);
@@ -108,10 +158,19 @@ namespace NC.Business.Servives
             var token = new JwtSecurityToken(GlobalSettings.GetIssuer(),
                 GlobalSettings.GetAudience(),
                 claims,
-                expires: DateTime.Now.AddDays(1),
+                expires: DateTime.Now.AddHours(12),
                 signingCredentials: credentials);
 
             return new JwtSecurityTokenHandler().WriteToken(token);
+        }
+
+        private string GenerateRefreshToken()
+        {
+            using var rngCryptoServiceProvider = new RNGCryptoServiceProvider();
+            var randomBytes = new byte[64];
+            rngCryptoServiceProvider.GetBytes(randomBytes);
+
+            return Convert.ToBase64String(randomBytes);
         }
 
         public bool CheckUsernameExisted(string username)

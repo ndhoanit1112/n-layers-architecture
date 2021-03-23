@@ -19,5 +19,7 @@ namespace NC.Infrastructure.Entities
         public bool IsDeleted { get; set; }
 
         public virtual ICollection<ApplicationUserRole> UserRoles { get; set; }
+
+        public virtual ICollection<RefreshToken> RefreshTokens { get; set; }
     }
 }
