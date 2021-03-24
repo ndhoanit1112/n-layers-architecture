@@ -1,32 +1,31 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-using AutoMapper;
+﻿using AutoMapper;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Net.Http.Headers;
 using NC.Business.IServices;
-using NC.Business.Models.User;
+using NC.Business.Models.Account;
+using NC.Common;
 using NC.Common.Enums;
 using NC.WebApi.Controllers.Base;
-using NC.WebApi.DTOs.Models.User;
-using NC.WebApi.DTOs.Results.User;
+using NC.WebApi.DTOs.Models.Account;
+using NC.WebApi.DTOs.Results.Account;
+using System.Threading.Tasks;
 
-namespace NC.WebApi.Controllers
+namespace NC.WebApi.Controllers.Admin
 {
-    [Route("api/[controller]")]
-    public class UserController : ApiBaseController
+    [Authorize(Roles = Constants.SystemAdminRole)]
+    [Route("api/admin/[controller]")]
+    public class AccountController : ApiBaseController
     {
-        private readonly IUserService _userService;
+        private readonly IAccountService _accountService;
 
         private readonly ICloudStorageService _storageService;
 
-        public UserController(IUserService userService, ICloudStorageService storageService, IMapper mapper)
+        public AccountController(IAccountService accountService, ICloudStorageService storageService, IMapper mapper)
             : base(mapper)
         {
-            _userService = userService;
+            _accountService = accountService;
             _storageService = storageService;
         }
 
@@ -35,7 +34,7 @@ namespace NC.WebApi.Controllers
         [Route("checkusername")]
         public IActionResult CheckUserName(string username)
         {
-            var result = _userService.CheckUsernameExisted(username);
+            var result = _accountService.CheckUsernameExisted(username);
 
             return Ok(Success(result));
         }
@@ -44,19 +43,20 @@ namespace NC.WebApi.Controllers
         [HttpPost]
         public async Task<IActionResult> Post([FromForm] string username)
         {
-            var result = await _userService.CreateUser(username, $"{username}@gmail.com", "Hello123#");
+            var result = await _accountService.CreateUser(username, $"{username}@gmail.com", "Hello123#");
 
             return Ok(Success(result));
         }
 
         [HttpPost]
+        [AllowAnonymous]
         [Route("login")]
         public async Task<IActionResult> Login([FromForm] LoginModelDTO model)
         {
             var loginModel = _mapper.Map<LoginModel>(model);
             loginModel.UserAgent = Request.Headers[HeaderNames.UserAgent].ToString();
 
-            var result = await _userService.Authenticate(loginModel);
+            var result = await _accountService.Authenticate(loginModel);
 
             if (result.Status == LoginStatus.Failed)
             {
@@ -72,13 +72,14 @@ namespace NC.WebApi.Controllers
         }
 
         [HttpPost]
+        [AllowAnonymous]
         [Route("refreshtoken")]
         public async Task<IActionResult> RefreshToken([FromForm] RefreshTokenModelDTO model)
         {
             var refreshTokenModel = _mapper.Map<RefreshTokenModel>(model);
             refreshTokenModel.UserAgent = Request.Headers[HeaderNames.UserAgent].ToString();
 
-            var result = await _userService.RefreshToken(refreshTokenModel);
+            var result = await _accountService.RefreshToken(refreshTokenModel);
 
             if (result == null)
             {
@@ -90,7 +91,6 @@ namespace NC.WebApi.Controllers
 
         [HttpPost]
         [Route("uploadfile")]
-        [Authorize]
         public async Task<IActionResult> UploadFile(IFormFile file)
         {
             var result = await _storageService.UploadFileAsync(file, file.FileName);
@@ -100,7 +100,6 @@ namespace NC.WebApi.Controllers
 
         [HttpPost]
         [Route("deletefile")]
-        [Authorize]
         public async Task<IActionResult> DeleteFile([FromForm] string fileName)
         {
             await _storageService.DeleteFileAsync(fileName);

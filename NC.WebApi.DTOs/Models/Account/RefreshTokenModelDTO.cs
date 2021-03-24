@@ -1,6 +1,6 @@
 ﻿using System.ComponentModel.DataAnnotations;
 
-namespace NC.WebApi.DTOs.Models.User
+namespace NC.WebApi.DTOs.Models.Account
 {
     public class RefreshTokenModelDTO
     {

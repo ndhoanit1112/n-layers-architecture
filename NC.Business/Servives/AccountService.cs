@@ -1,8 +1,7 @@
 ﻿using Microsoft.AspNetCore.Identity;
-using Microsoft.Extensions.Configuration;
 using Microsoft.IdentityModel.Tokens;
 using NC.Business.IServices;
-using NC.Business.Models.User;
+using NC.Business.Models.Account;
 using NC.Business.Servives.Base;
 using NC.Common;
 using NC.Common.Enums;
@@ -20,7 +19,7 @@ using System.Threading.Tasks;
 
 namespace NC.Business.Servives
 {
-    public class UserService : BaseService, IUserService
+    public class AccountService : BaseService, IAccountService
     {
         private readonly NCContext _context;
 
@@ -30,7 +29,7 @@ namespace NC.Business.Servives
 
         private readonly RoleManager<ApplicationRole> _roleManager;
 
-        public UserService(NCContext context, UserManager<ApplicationUser> userManager, SignInManager<ApplicationUser> signInManager, RoleManager<ApplicationRole> roleManager)
+        public AccountService(NCContext context, UserManager<ApplicationUser> userManager, SignInManager<ApplicationUser> signInManager, RoleManager<ApplicationRole> roleManager)
         {
             _context = context;
             _userManager = userManager;
@@ -58,7 +57,7 @@ namespace NC.Business.Servives
         {
             var user = await _userManager.FindByNameAsync(loginModel.Username);
 
-            if(user == null)
+            if (user == null)
             {
                 return new LoginResult(LoginStatus.Failed, "Invalid username or password!");
             }
@@ -150,7 +149,7 @@ namespace NC.Business.Servives
                 new Claim(ClaimTypes.Email, userInfo.Email),
             };
 
-            foreach(var role in userInfo.Roles)
+            foreach (var role in userInfo.Roles)
             {
                 claims.Add(new Claim(ClaimTypes.Role, role));
             }

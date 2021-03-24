@@ -54,7 +54,7 @@ namespace NC.WebApi
                     .AddEntityFrameworkStores<NCContext>()
                     .AddDefaultTokenProviders();
 
-            services.RegisterAssemblyTypes(typeof(UserService).Assembly)
+            services.RegisterAssemblyTypes(typeof(AccountService).Assembly)
                 .Where(c => c.Name.EndsWith("Service", StringComparison.Ordinal)
                             && c != typeof(BaseService))
                 .AsImplementedInterfaces(typeof(IBaseService));
