@@ -41,7 +41,7 @@ namespace NC.WebApi.Controllers.Admin
 
         // POST api/<UserController>
         [HttpPost]
-        public async Task<IActionResult> Post([FromForm] string username)
+        public async Task<IActionResult> Post([FromBody] string username)
         {
             var result = await _accountService.CreateUser(username, $"{username}@gmail.com", "Hello123#");
 
@@ -51,7 +51,7 @@ namespace NC.WebApi.Controllers.Admin
         [HttpPost]
         [AllowAnonymous]
         [Route("login")]
-        public async Task<IActionResult> Login([FromForm] LoginModelDTO model)
+        public async Task<IActionResult> Login([FromBody] LoginModelDTO model)
         {
             var loginModel = _mapper.Map<LoginModel>(model);
             loginModel.UserAgent = Request.Headers[HeaderNames.UserAgent].ToString();
@@ -74,7 +74,7 @@ namespace NC.WebApi.Controllers.Admin
         [HttpPost]
         [AllowAnonymous]
         [Route("refreshtoken")]
-        public async Task<IActionResult> RefreshToken([FromForm] RefreshTokenModelDTO model)
+        public async Task<IActionResult> RefreshToken([FromBody] RefreshTokenModelDTO model)
         {
             var refreshTokenModel = _mapper.Map<RefreshTokenModel>(model);
             refreshTokenModel.UserAgent = Request.Headers[HeaderNames.UserAgent].ToString();
@@ -100,7 +100,7 @@ namespace NC.WebApi.Controllers.Admin
 
         [HttpPost]
         [Route("deletefile")]
-        public async Task<IActionResult> DeleteFile([FromForm] string fileName)
+        public async Task<IActionResult> DeleteFile([FromBody] string fileName)
         {
             await _storageService.DeleteFileAsync(fileName);
 

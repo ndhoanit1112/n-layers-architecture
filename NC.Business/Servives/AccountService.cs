@@ -27,14 +27,14 @@ namespace NC.Business.Servives
 
         private readonly SignInManager<ApplicationUser> _signInManager;
 
-        private readonly RoleManager<ApplicationRole> _roleManager;
+        private readonly IEmailService _emailService;
 
-        public AccountService(NCContext context, UserManager<ApplicationUser> userManager, SignInManager<ApplicationUser> signInManager, RoleManager<ApplicationRole> roleManager)
+        public AccountService(NCContext context, UserManager<ApplicationUser> userManager, SignInManager<ApplicationUser> signInManager, IEmailService emailService)
         {
             _context = context;
             _userManager = userManager;
             _signInManager = signInManager;
-            _roleManager = roleManager;
+            _emailService = emailService;
         }
 
         public async Task<bool> CreateUser(string username, string email, string password)
@@ -50,6 +50,12 @@ namespace NC.Business.Servives
             var result = await _userManager.CreateAsync(newUser, password);
 
             await _userManager.AddToRoleAsync(newUser, Constants.SystemAdminRole);
+
+            if (result.Succeeded)
+            {
+                await _emailService.SendEmailAsync(email, "User created successfully", "Thank you for using our service!");
+            }
+
             return result.Succeeded;
         }
 

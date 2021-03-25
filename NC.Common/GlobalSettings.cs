@@ -30,5 +30,10 @@ namespace NC.Common
         {
             return Configuration.GetSection("GoogleCloudStorage").GetValue<string>("Bucket");
         }
+
+        public static SmtpSettings GetSmtpSettings()
+        {
+            return Configuration.GetSection("SmtpSettings").Get<SmtpSettings>();
+        }
     }
 }
