@@ -149,15 +149,13 @@ namespace NC.Business.Servives
             var credentials = new SigningCredentials(securityKey, SecurityAlgorithms.HmacSha256);
 
             var claims = new List<Claim>() {
-                new Claim(ClaimTypes.NameIdentifier, userInfo.Id),
-                new Claim(ClaimTypes.GivenName, userInfo.FirstName),
-                new Claim(ClaimTypes.Surname, userInfo.LastName),
-                new Claim(ClaimTypes.Email, userInfo.Email),
+                new Claim(JwtRegisteredClaimNames.NameId, userInfo.Id),
+                new Claim(Constants.ClaimTypeFullName, $"{userInfo.FirstName} {userInfo.LastName}"),
             };
 
             foreach (var role in userInfo.Roles)
             {
-                claims.Add(new Claim(ClaimTypes.Role, role));
+                claims.Add(new Claim(Constants.ClaimTypeRole, role));
             }
 
             var token = new JwtSecurityToken(GlobalSettings.GetIssuer(),

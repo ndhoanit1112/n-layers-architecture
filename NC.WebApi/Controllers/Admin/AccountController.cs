@@ -10,6 +10,7 @@ using NC.Common.Enums;
 using NC.WebApi.Controllers.Base;
 using NC.WebApi.DTOs.Models.Account;
 using NC.WebApi.DTOs.Results.Account;
+using System.Security.Claims;
 using System.Threading.Tasks;
 
 namespace NC.WebApi.Controllers.Admin
@@ -34,6 +35,8 @@ namespace NC.WebApi.Controllers.Admin
         [Route("checkusername")]
         public IActionResult CheckUserName(string username)
         {
+            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier); // will give the user Id
+
             var result = _accountService.CheckUsernameExisted(username);
 
             return Ok(Success(result));
